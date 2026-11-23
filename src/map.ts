@@ -177,7 +177,6 @@ export class TangleMap {
     this.pad = p;
     this.dirty = true;
     if (this.compass) Object.assign(this.compass.style, { right: `${p.right + 16}px`, bottom: `${p.bottom + 16}px` });
-    if (this.turns) Object.assign(this.turns.style, { right: `${p.right + 16}px`, bottom: `${p.bottom + 16 + 46 + 8}px` });
   }
   /** The padding actually in use, easing toward `pad` so the map glides when panels resize. */
   private padCur: Pad | null = null;
@@ -218,7 +217,6 @@ export class TangleMap {
       if (!on) this.settleFlat();
     } else if (from !== to) this.tiltAnim = { from, to, start: -1, yaw0: this.yaw, pitch0: this.pitch };
     this.compass?.classList.toggle('on', on);
-    this.turns?.classList.toggle('on', on);
     this.dirty = true;
     if (on) this.wakeDeco();
   }
@@ -257,8 +255,7 @@ export class TangleMap {
   /** The board's transform as a matrix, for converting between screen and map. */
   private M = new DOMMatrix();
   private tiltCss = '';
-  private compass: HTMLButtonElement | null = null;
-  private turns: HTMLElement | null = null;
+  private compass: HTMLElement | null = null;
 
   /** Set the board's transform for the current lean and turn. */
   private applyTilt() {
@@ -332,29 +329,36 @@ export class TangleMap {
   }
 
   /**
-   * A small turn dial, shown while tilted. The book never says which way is north, so it shows how far
-   * the reader has turned the map from where it started, not a compass heading. Drag to turn, tap
-   * (or Enter) to go back to the starting view, arrows to turn and lean.
+   * A small round turn control, shown while tilted, in the manner of a maps app: a needle in the middle
+   * and a curved arrow on each side. The book never says which way is north, so the needle (red end)
+   * points to the map's starting "up", not to north. Drag the dial to turn, tap it (or Enter) to go back
+   * to the starting view, tap a side arrow to turn 45°, arrow keys to turn and lean.
    */
   private makeCompass(host: HTMLElement) {
+    const wrap = document.createElement('div');
+    wrap.className = 'compass';
     const b = document.createElement('button');
-    b.className = 'compass';
+    b.className = 'dial';
     b.type = 'button';
     b.title = 'Turn the map (drag), or tap to straighten it';
     b.setAttribute('aria-label', 'Map rotation. Arrow keys turn and lean the map; Enter straightens it again.');
-    const ticks = Array.from({ length: 24 }, (_, i) => { const a = (i * Math.PI) / 12, r0 = i % 6 ? 17.5 : 15.5; return `M${(r0 * Math.sin(a)).toFixed(2)} ${(-r0 * Math.cos(a)).toFixed(2)}L${(19.5 * Math.sin(a)).toFixed(2)} ${(-19.5 * Math.cos(a)).toFixed(2)}`; }).join('');
-    // the ticks and the little map sheet turn with the map; the amber mark at the top stays put, so it reads like a dial
-    b.innerHTML = `<svg viewBox="-22 -22 44 44" aria-hidden="true"><g class="needle"><path d="${ticks}" class="tk"/><rect x="-7" y="-8.5" width="14" height="17" rx="2.5" class="sh"/><path d="M-3.5-4.5H3.5M-3.5-1H3.5M-3.5 2.5H1" class="sl"/></g><path d="M0-21.5 2.6-17.6H-2.6Z" class="mk"/></svg>`;
+    // the side arrows are drawn here (they stay put) and hit by the transparent buttons laid over them
+    const side = 'M17.32-10A20 20 0 0 1 17.32 10M21.89 8.48 17.32 10 16.35 5.28';
+    b.innerHTML = `<svg viewBox="-26 -26 52 52" aria-hidden="true"><path d="${side}" class="ar r"/><path d="${side}" class="ar l" transform="scale(-1 1)"/><g class="needle"><path d="M0-14 4.6 0H-4.6Z" class="n"/><path d="M0 14 4.6 0H-4.6Z" class="s"/><circle r="1.6" class="c"/></g></svg>`;
     // its look lives here, not in the lazily loaded 3D stylesheet, so it is never unstyled
     const css = document.createElement('style');
-    css.textContent = `.compass{position:absolute;z-index:6;width:46px;height:46px;padding:0;border-radius:50%;border:1px solid #ffffff2e;background:#101218d9;display:grid;place-items:center;cursor:grab;touch-action:none;
-  visibility:hidden;opacity:0;transform:scale(.85);transition:opacity .35s,transform .35s,visibility 0s .35s}
+    css.textContent = `.compass{position:absolute;z-index:6;width:52px;height:52px;visibility:hidden;opacity:0;transform:scale(.85);transition:opacity .35s,transform .35s,visibility 0s .35s}
 .compass.on{visibility:visible;opacity:1;transform:none;transition-delay:0s}
-.compass:active{cursor:grabbing}.compass:focus-visible{outline:2px solid #ffb02e;outline-offset:2px}
-.compass svg{width:40px;height:40px;overflow:visible}.compass .needle{transform:rotate(var(--turn,0deg))}
-.compass .tk{stroke:#efe6d080;stroke-width:1.2;stroke-linecap:round}.compass .sh{fill:#efe6d01f;stroke:#efe6d0;stroke-width:1.3}
-.compass .sl{stroke:#efe6d0a6;stroke-width:1.2;stroke-linecap:round}.compass .mk{fill:#ffb02e}`;
-    host.append(css, b);
+.compass .dial{position:absolute;inset:0;width:100%;height:100%;padding:0;border-radius:50%;border:1px solid #ffffff2e;background:#101218e6;box-shadow:0 2px 10px #0006;display:grid;place-items:center;cursor:grab;touch-action:none}
+.compass .dial:active{cursor:grabbing}.compass .dial:focus-visible{outline:2px solid #ffb02e;outline-offset:2px}
+.compass svg{width:52px;height:52px;overflow:visible}.compass .needle{transform:rotate(var(--turn,0deg))}
+.compass .n{fill:#e5484d}.compass .s{fill:#efe6d0}.compass .c{fill:#101218}
+.compass .ar{fill:none;stroke:#efe6d0b3;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .15s}
+.compass.hl .ar.l,.compass.hr .ar.r{stroke:#ffb02e}
+.compass .rot{position:absolute;top:8px;width:18px;height:36px;padding:0;border:0;background:none;cursor:pointer;border-radius:9px}
+.compass .rot.l{left:0}.compass .rot.r{right:0}.compass .rot:focus-visible{outline:2px solid #ffb02e;outline-offset:0}`;
+    wrap.append(b);
+    host.append(css, wrap);
     let drag: { a: number; x: number; y: number; moved: number; rim: boolean } | null = null;
     const at = (e: PointerEvent) => { const r = b.getBoundingClientRect(), x = e.clientX - r.left - r.width / 2, y = e.clientY - r.top - r.height / 2; return { a: Math.atan2(y, x), d: Math.hypot(x, y) }; };
     b.addEventListener('pointerdown', (e) => {
@@ -386,38 +390,25 @@ export class TangleMap {
       const base = this.orbit ?? { yaw: this.yaw, pitch: this.pitch };
       this.orbitTo(base.yaw + step[0] * (Math.PI / 12), base.pitch + step[1] * 4);
     });
-    this.compass = b;
-    // two quick turns above the dial: to the next 45° step either way
-    const turns = document.createElement('div');
-    turns.className = 'turns';
-    // a small arc with its head on the turning end; mirrored for anticlockwise
-    const arrow = (cw: boolean) => `<svg viewBox="0 0 16 10" aria-hidden="true"><g${cw ? '' : ' transform="translate(16 0) scale(-1 1)"'}><path d="M2.5 8.2C3.6 4.2 7.4 2.2 11.6 3.6" class="ta"/><path d="M9.4 1.2 12.4 3.8 9.6 6.6" class="ta"/></g></svg>`;
+    // the side arrows: 45° to the next mark either way (left anticlockwise, right clockwise); quick taps add up
     for (const cw of [false, true]) {
       const t = document.createElement('button');
       t.type = 'button';
-      t.className = 'turn-step';
+      t.className = `rot ${cw ? 'r' : 'l'}`;
       t.title = cw ? 'Turn 45° clockwise' : 'Turn 45° anticlockwise';
       t.setAttribute('aria-label', t.title);
-      t.innerHTML = `${arrow(cw)}<span>${cw ? '+' : '−'}45°</span>`;
       t.addEventListener('pointerdown', (e) => e.stopPropagation());
+      t.addEventListener('pointerenter', () => wrap.classList.add(cw ? 'hr' : 'hl'));
+      t.addEventListener('pointerleave', () => wrap.classList.remove(cw ? 'hr' : 'hl'));
       t.addEventListener('click', (e) => {
         e.stopPropagation();
         const q = Math.PI / 4, base = this.orbit ?? { yaw: this.yaw, pitch: this.pitch };
         const k = base.yaw / q;
         this.orbitTo((cw ? Math.floor(k + 1e-3) + 1 : Math.ceil(k - 1e-3) - 1) * q, base.pitch);
       });
-      turns.append(t);
+      wrap.append(t);
     }
-    css.textContent += `.turns{position:absolute;z-index:6;width:46px;display:flex;flex-direction:column;border-radius:16px;border:1px solid #ffffff2e;background:#101218d9;overflow:hidden;
-  visibility:hidden;opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s,visibility 0s .35s}
-.turns.on{visibility:visible;opacity:1;transform:none;transition-delay:0s}
-.turn-step{height:40px;padding:0;border:0;background:none;color:#efe6d0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;
-  font:600 10.5px/1 Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:.01em}
-.turn-step+.turn-step{border-top:1px solid #ffffff1f}
-.turn-step:hover{background:#ffffff12}.turn-step:active{background:#ffffff1f}.turn-step:focus-visible{outline:2px solid #ffb02e;outline-offset:-2px}
-.turn-step svg{width:16px;height:10px}.turn-step .ta{fill:none;stroke:#ffb02e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}`;
-    host.append(turns);
-    this.turns = turns;
+    this.compass = wrap;
   }
 
   /** Decorative WebGL layer, present only while tilted (and while it fades out). */
