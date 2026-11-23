@@ -121,7 +121,7 @@ async function chapter(n: number) {
 {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const page = await ctx.newPage();
-  await page.addInitScript((v) => localStorage.setItem('iron-tangle/v1', JSON.stringify(v)), seed(total, true));
+  await page.addInitScript((v) => localStorage.setItem('iron-tangle/v1', JSON.stringify(v)), seed(total, false)); // flat: CI machines have no GPU, and this checks text
   await page.goto(base);
   await page.waitForSelector('.tick');
   await page.click('[data-tab="codex"]');
