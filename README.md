@@ -104,9 +104,9 @@ Found something wrong, or something the map should show? Please open an [issue](
 
 ## Credits
 
-Created by Ricardo Canales ([@canalesb93 on Threads](https://www.threads.com/@canalesb93)).
-
 Thanks to the Dungeon Crawler Carl community, whose shared work made this possible: the fan wiki (including its "Untangling the Iron Tangle" page), readers' chapter summaries, and the fan maps that served as inspiration. Facts cross-checked against those sources are restated in our own words. And thanks to Matt Dinniman for the books.
+
+Ricardo Canales ([@canalesb93 on Threads](https://www.threads.com/@canalesb93)).
 
 ## Security and conduct
 
