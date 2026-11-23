@@ -146,7 +146,7 @@ export const lines: Line[] = [
     id: 'nightmare', revealAt: 4, name: 'Nightmare Express', kind: 'named', color: '#1d1e24',
     legs: [
       // 83 → 283 → (cavern) → 436 → 283 → 83 and round again, crossing over between each pair
-      { at: 15, stops: ['s83', [700, 250], cross(115), cross(290), 's283', 'cavern', 's436', cross(55), cross(232), 's283b', 's83b', [0, 1150]], closed: true },
+      { at: 15, stops: ['s83', [700, 250], cross(115), cross(288), 's283', [-510, -630], 'cavern', 's436', cross(55), cross(232), 's283b', 's83b', [0, 1150]], closed: true },
       { at: 19, stops: ['s60', 's41'] },
     ],
     stages: [
@@ -424,7 +424,7 @@ export const stations: Station[] = [
     ],
   },
   {
-    id: 'cavern', revealAt: 15, name: 'Switching Cavern', pos: { deg: 15, r: 980 },
+    id: 'cavern', revealAt: 15, name: 'Switching Cavern', pos: { deg: 10, r: 990 },
     kinds: [{ at: 15, kind: 'landmark' }],
     stages: [
       { at: 15, text: 'A junction on the Nightmare Express route just before station 436, with three gates: Auxiliary Tracks, Station Repair and Recycle.' },
