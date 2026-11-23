@@ -1,0 +1,37 @@
+{
+  "name": "iron-untangled",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Iron Untangled: an unofficial, spoiler-safe, chapter-by-chapter map and reading companion for Dungeon Crawler Carl: The Dungeon Anarchist's Cookbook",
+  "license": "MIT",
+  "author": "Ricardo Canales",
+  "homepage": "https://ironuntangled.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/canalesb93/iron-untangled.git"
+  },
+  "bugs": {
+    "url": "https://github.com/canalesb93/iron-untangled/issues"
+  },
+  "type": "module",
+  "scripts": {
+    "data": "node scripts/build-data.ts",
+    "dev": "npm run data && vite",
+    "build": "npm run data && tsc && vite build",
+    "preview": "vite preview --port 4317",
+    "test:spoilers": "node scripts/e2e.ts",
+    "test:worker": "tsc -p worker && node --test 'worker/*.test.ts'",
+    "deploy": "npm run build && wrangler deploy",
+    "og": "node scripts/og.ts"
+  },
+  "devDependencies": {
+    "@types/three": "^0.187.0",
+    "playwright": "^1.65.1",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6",
+    "wrangler": "^4.166.0"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  }
+}

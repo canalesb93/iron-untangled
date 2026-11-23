@@ -1,0 +1,8 @@
+# The per-chapter data files (/data/) are not blocked here on purpose: they
+# carry an "X-Robots-Tag: noindex, nofollow" header (see _headers), and a
+# crawler only sees that header if it is allowed to fetch them.
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://ironuntangled.app/sitemap.xml

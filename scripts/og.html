@@ -1,0 +1,62 @@
+<!doctype html>
+<!--
+  The social card (public/og.png, 1200x630). Rendered by scripts/og.ts (`npm run og`).
+  Spoiler rule: nothing here may name a station, line, character or creature.
+  The map behind the sign is an abstract schematic, not the real layout.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=block" rel="stylesheet" />
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body { position: relative; background: #0d0e11; font-family: Inter, system-ui, sans-serif; color: #ece6d6; -webkit-font-smoothing: antialiased; }
+  .map { position: absolute; inset: 0; }
+  /* the fog: dark everywhere, a paper-coloured clearing where the reader is */
+  .fog { position: absolute; inset: 0; background:
+      radial-gradient(ellipse 520px 300px at 600px 300px, #efe6d014 0%, #0d0e1100 70%),
+      radial-gradient(ellipse 760px 420px at 600px 300px, #0d0e1100 35%, #0d0e11d9 80%, #0d0e11 100%); }
+  .card { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-bottom: 34px; }
+  .sign { position: relative; display: grid; place-items: center; width: 900px; height: 290px; margin-bottom: 26px; }
+  .ring { position: absolute; width: 290px; height: 290px; border-radius: 50%; border: 50px solid #e5484d; box-sizing: border-box; box-shadow: 0 18px 50px #0009; }
+  .bar { position: relative; padding: 22px 50px 20px; border-radius: 10px; background: #efe6d0; color: #1d1e24; box-shadow: 0 0 0 12px #15171c, 0 24px 60px #000a;
+    font: 800 72px/1 Inter, sans-serif; letter-spacing: 0.085em; text-transform: uppercase; white-space: nowrap; }
+  .bar i { font-style: normal; color: #c9333a; }
+  h1 { margin: 0; font-size: 46px; font-weight: 750; letter-spacing: -0.01em; color: #f4eedf; text-shadow: 0 2px 18px #000; }
+  p { margin: 14px 0 0; font-size: 27px; font-weight: 450; color: #bdb6a6; text-shadow: 0 2px 14px #000; }
+  p i { font-style: italic; color: #d9d2c1; }
+  .url { position: absolute; left: 0; right: 0; bottom: 30px; text-align: center; font-size: 21px; font-weight: 600; letter-spacing: 0.06em; color: #d2a85a; }
+</style>
+</head>
+<body>
+  <svg class="map" viewBox="0 0 1200 630" aria-hidden="true">
+    <defs>
+      <filter id="soft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.2" /></filter>
+    </defs>
+    <g filter="url(#soft)" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.55">
+      <!-- faint street grid -->
+      <g stroke="#2b2f39" stroke-width="2">
+        <path d="M0 120H1200M0 250H1200M0 380H1200M0 510H1200M150 0V630M330 0V630M510 0V630M690 0V630M870 0V630M1050 0V630" />
+      </g>
+      <!-- generic schematic lines -->
+      <path d="M-20 520 L240 470 L420 360 L600 300 L790 250 L980 130 L1220 90" stroke="#e5484d" stroke-width="12" />
+      <path d="M90 -20 L250 140 L420 250 L600 300 L760 420 L900 650" stroke="#d2a85a" stroke-width="10" />
+      <path d="M-20 300 L300 300 L470 210 L700 200 L860 300 L1220 330" stroke="#4f8fd6" stroke-width="10" stroke-dasharray="2 22" />
+      <path d="M1220 560 L980 500 L800 430 L640 470 L460 560 L360 650" stroke="#46a37a" stroke-width="10" />
+      <path d="M560 -20 L620 120 L700 200 L740 330 L800 430" stroke="#9d6fd1" stroke-width="8" stroke-dasharray="2 18" />
+      <g stroke="#ece6d6" stroke-width="5" fill="#0d0e11">
+        <circle cx="240" cy="470" r="9" /><circle cx="420" cy="360" r="9" /><circle cx="790" cy="250" r="9" /><circle cx="980" cy="130" r="9" />
+        <circle cx="250" cy="140" r="9" /><circle cx="420" cy="250" r="9" /><circle cx="760" cy="420" r="9" /><circle cx="470" cy="210" r="9" />
+        <circle cx="860" cy="300" r="9" /><circle cx="980" cy="500" r="9" /><circle cx="640" cy="470" r="9" /><circle cx="700" cy="200" r="9" />
+      </g>
+    </g>
+  </svg>
+  <div class="fog"></div>
+  <div class="card">
+    <div class="sign"><span class="ring"></span><span class="bar">Iron <i>Un</i>tangled</span></div>
+    <h1>A spoiler-safe map of the Iron Tangle</h1>
+    <p>for <i>Dungeon Crawler Carl: The Dungeon Anarchist’s Cookbook</i></p>
+  </div>
+  <div class="url">IRONUNTANGLED.APP</div>
+</body>
+</html>

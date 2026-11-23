@@ -1,0 +1,22 @@
+name: Feature or idea
+description: Suggest something the map or companion could do, or report a bug in the app itself.
+labels: ["idea"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas are welcome. If your idea involves the story, prefix the title with the chapter it relates to (e.g. `[Ch 20] …`) and keep plot details out of the title.
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What would you like to see, and what problem would it solve for a reader?
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Anything else that helps, such as sketches, examples, or how it should behave for a reader who hasn't reached a chapter yet.
+    validations:
+      required: false

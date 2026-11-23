@@ -1,0 +1,27 @@
+Iron Untangled (https://ironuntangled.app)
+Copyright (c) 2026 Ricardo Canales and contributors
+
+An unofficial fan project. Not affiliated with, or endorsed by, Matt Dinniman
+or any publisher of Dungeon Crawler Carl.
+
+Code
+  The source code (everything outside content/, unless a file says otherwise)
+  is released under the MIT License. See LICENSE.
+
+Written content
+  The written content under content/ (recaps, notes, definitions, questions
+  and other commentary) is original paraphrase and commentary by the
+  project's contributors. It is offered under the Creative Commons
+  Attribution 4.0 International licence (CC BY 4.0):
+  https://creativecommons.org/licenses/by/4.0/
+
+  Facts that were cross-checked against the Dungeon Crawler Carl fan wiki
+  and readers' chapter summaries are restated in our own words; no text from
+  those sources is copied.
+
+What this licence does not cover
+  "Dungeon Crawler Carl", "The Dungeon Anarchist's Cookbook", the story, its
+  world, places and characters belong to their author and publisher. Nothing
+  in this project grants any rights in them. No book text, cover art or fan
+  art is included. The portraits in src/portraits.ts are original drawings
+  made for this project and are covered by the MIT License with the code.

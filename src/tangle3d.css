@@ -1,0 +1,21 @@
+/* Tilted map only (loaded with the 3D layer). See src/upright3d.ts. */
+
+/* The flat originals are hidden while their upright copies are shown.
+   visibility only: no opacity or filters on the map's SVG (keeps it one GPU surface). */
+.stage.up3d-on .deck .party .crew,
+.stage.up3d-on .deck .party .cap-slot,
+.stage.up3d-on .deck .party .stem,
+.stage.up3d-on .deck .ev .mk,
+.stage.up3d-on .deck .st .lbl { visibility: hidden; }
+
+.up3d-root { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; }
+.up3d { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; transform-origin: 0 0; pointer-events: none; }
+.up3d .mk { animation: none !important; } /* copies must not replay the map's pop-in */
+.up3d .lbl { pointer-events: auto; cursor: pointer; }
+.up3d .up-shadow { fill: #000; fill-opacity: 0.28; }
+
+/* While the 3D layer draws the fog (its base sheet is this canvas, redrawn on the ground with
+   the same mask and clouds), the flat fog canvas is hidden: it would otherwise be a second
+   board-sized GPU surface. It is still painted every frame, so it can come straight back. */
+.stage.fog3d .deck.fog { visibility: hidden; }
+.up3d .cap { animation: none !important; }

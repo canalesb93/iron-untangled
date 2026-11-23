@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Iron Untangled · a spoiler-safe map of the Iron Tangle</title>
+    <meta name="description" content="A spoiler-safe, chapter-by-chapter map and reading companion for Dungeon Crawler Carl: The Dungeon Anarchist's Cookbook. Shows only what you've read." />
+    <meta name="author" content="Ricardo Canales" />
+    <meta name="theme-color" content="#0d0e11" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="canonical" href="https://ironuntangled.app/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Iron Untangled" />
+    <meta property="og:url" content="https://ironuntangled.app/" />
+    <meta property="og:title" content="Iron Untangled · a spoiler-safe map of the Iron Tangle" />
+    <meta property="og:description" content="A chapter-by-chapter map and reading companion for Dungeon Crawler Carl: The Dungeon Anarchist's Cookbook. It only shows what the book has told you so far." />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://ironuntangled.app/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Iron Untangled: a spoiler-safe map of the Iron Tangle, for Dungeon Crawler Carl: The Dungeon Anarchist's Cookbook" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Iron Untangled · a spoiler-safe map of the Iron Tangle" />
+    <meta name="twitter:description" content="A chapter-by-chapter map and reading companion for Dungeon Crawler Carl: The Dungeon Anarchist's Cookbook. It only shows what the book has told you so far." />
+    <meta name="twitter:image" content="https://ironuntangled.app/og.png" />
+    <meta name="twitter:image:alt" content="Iron Untangled: a spoiler-safe map of the Iron Tangle, for Dungeon Crawler Carl: The Dungeon Anarchist's Cookbook" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap" rel="stylesheet" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://ironuntangled.app/#website",
+            "url": "https://ironuntangled.app/",
+            "name": "Iron Untangled",
+            "description": "A spoiler-safe, chapter-by-chapter map and reading companion for Dungeon Crawler Carl: The Dungeon Anarchist's Cookbook.",
+            "inLanguage": "en"
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://ironuntangled.app/#app",
+            "name": "Iron Untangled",
+            "url": "https://ironuntangled.app/",
+            "applicationCategory": "ReferenceApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires JavaScript",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Person", "name": "Ricardo Canales", "url": "https://www.threads.com/@canalesb93" },
+            "about": {
+              "@type": "Book",
+              "name": "Dungeon Crawler Carl: The Dungeon Anarchist's Cookbook",
+              "author": { "@type": "Person", "name": "Matt Dinniman" }
+            }
+          }
+        ]
+      }
+    </script>
+    <!-- Shown only if the app has not replaced it (no JavaScript, or it failed to load); fades in late so it never flashes. -->
+    <style>
+      .nojs { min-height: 100%; display: grid; place-items: center; padding: 32px 16px; background: #0d0e11; color: #ece6d6; font: 16px/1.55 Inter, system-ui, -apple-system, sans-serif; text-align: center; animation: nojs-in 0.3s 1.2s both; }
+      @keyframes nojs-in { from { opacity: 0; } }
+      .nojs > div { max-width: 34rem; }
+      .nojs h1 { position: relative; display: grid; place-items: center; height: 92px; margin: 0 0 20px; }
+      .nojs h1::before { content: ''; position: absolute; width: 92px; height: 92px; border-radius: 50%; border: 18px solid #e5484d; box-sizing: border-box; }
+      .nojs h1 span { position: relative; padding: 8px 20px 7px; border-radius: 4px; background: #efe6d0; color: #1d1e24; box-shadow: 0 0 0 5px #15171c; font: 800 26px/1 Inter, system-ui, sans-serif; letter-spacing: 0.09em; text-transform: uppercase; white-space: nowrap; }
+      .nojs h1 i { font-style: normal; color: #c9333a; }
+      .nojs p { margin: 0 0 12px; color: #c9c2b1; }
+      .nojs a { color: #e3bd75; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <main class="nojs">
+        <div>
+          <h1><span>Iron <i>Un</i>tangled</span></h1>
+          <p>A spoiler-safe, chapter-by-chapter map and reading companion for <i>Dungeon Crawler Carl: The Dungeon Anarchist’s Cookbook</i>.</p>
+          <p>Tell it the last chapter you finished and it draws the Iron Tangle as far as the book has revealed it, with a short recap of each chapter. Everything ahead of you stays under fog.</p>
+          <p>The map needs JavaScript. It is an unofficial fan project and <a href="https://github.com/canalesb93/iron-untangled">open source on GitHub</a>.</p>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

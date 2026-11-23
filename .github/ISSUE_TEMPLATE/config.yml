@@ -1,0 +1,11 @@
+# Blank issues stay disabled so every report gets the chapter-prefix and
+# spoiler reminders. Reports from the in-app feedback button are created by
+# the app itself and are not affected by this setting.
+blank_issues_enabled: false
+contact_links:
+  - name: How to contribute
+    url: https://github.com/canalesb93/iron-untangled/blob/main/CONTRIBUTING.md
+    about: How reveal chapters work, the spoiler lint, and how to open a pull request.
+  - name: Report a security vulnerability
+    url: https://github.com/canalesb93/iron-untangled/security/advisories/new
+    about: Please report security problems privately, not in a public issue.

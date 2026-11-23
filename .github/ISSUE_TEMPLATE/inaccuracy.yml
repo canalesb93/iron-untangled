@@ -1,0 +1,53 @@
+name: Inaccuracy
+description: Something in the app doesn't match the book (wrong fact, early reveal, missing detail).
+title: "[Ch ] "
+labels: ["inaccuracy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping keep the map right. This issue will be public and may contain spoilers, so:
+        - **Put the chapter number in the title**, e.g. `[Ch 12] Wrong number for a stop`.
+        - **Keep plot details out of the title.** The body is the place for them.
+        - Describe the book in your own words; please don't paste text from it.
+  - type: input
+    id: chapter
+    attributes:
+      label: Chapter
+      description: The chapter you had finished when you saw this in the app (the chapter selector's number).
+      placeholder: "12"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of problem?
+      options:
+        - Wrong fact (station, line, trip, person, recap, term)
+        - Revealed too early (a spoiler)
+        - Revealed too late, or missing
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: app
+    attributes:
+      label: What the app says
+      description: Where you saw it (Chapter tab, Codex, map label, directory…) and what it shows.
+    validations:
+      required: true
+  - type: textarea
+    id: book
+    attributes:
+      label: What the book says
+      description: In your own words. Include the chapter where the book shows it, if different from above.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: Chapter number(s) in the book, and any other source you checked (fan wiki page, summary). Links are welcome.
+      placeholder: "Ch 12, near the end. Also the fan wiki's station table."
+    validations:
+      required: true

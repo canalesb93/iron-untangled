@@ -1,0 +1,40 @@
+// Cloudflare Workers: static assets plus a small script for /api/* only.
+// Deploy with `npm run deploy`, or connect the repo in the dashboard
+// (build command `npm run build`, deploy command `npx wrangler deploy`).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "iron-untangled",
+  "compatibility_date": "2026-11-01",
+  // the script: reader reports (POST /api/feedback). See worker/index.ts.
+  "main": "./worker/index.ts",
+  // the public address; workers.dev stays on as well
+  "routes": [{ "pattern": "ironuntangled.app", "custom_domain": true }],
+  "workers_dev": true,
+  // keep logs for the report endpoint (static files never invoke the script)
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": "./dist",
+    // lets the script read chapter bundles to name what a report is about
+    "binding": "ASSETS",
+    // a chapter file that doesn't exist must be a real 404, never the app page
+    "not_found_handling": "404-page",
+    // only these paths reach the script; everything else is served as an asset
+    // exactly as before, with public/_headers applied and no Worker invocation
+    "run_worker_first": ["/api/*"]
+  },
+  "vars": {
+    "GITHUB_REPO": "canalesb93/iron-untangled",
+    // a var so local runs can point at a stub instead of GitHub
+    "GITHUB_API": "https://api.github.com"
+  },
+  // GITHUB_TOKEN is a secret: `npx wrangler secret put GITHUB_TOKEN`.
+  // Without it the endpoint answers 503 not_configured and the page offers
+  // a prefilled GitHub issue instead.
+  "ratelimits": [
+    // per visitor (keyed on a hash of the IP): 3 reports a minute
+    { "name": "FEEDBACK_RATE", "namespace_id": "4401", "simple": { "limit": 3, "period": 60 } },
+    // the whole site: at most 20 reports a minute, whoever sends them
+    { "name": "FEEDBACK_RATE_ALL", "namespace_id": "4402", "simple": { "limit": 20, "period": 60 } }
+  ],
+  "version_metadata": { "binding": "CF_VERSION_METADATA" }
+}
