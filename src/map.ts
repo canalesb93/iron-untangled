@@ -177,6 +177,7 @@ export class TangleMap {
     this.pad = p;
     this.dirty = true;
     if (this.compass) Object.assign(this.compass.style, { right: `${p.right + 16}px`, bottom: `${p.bottom + 16}px` });
+    if (this.turns) Object.assign(this.turns.style, { right: `${p.right + 16 + 5}px`, bottom: `${p.bottom + 16 + 46 + 8}px` });
   }
   /** The padding actually in use, easing toward `pad` so the map glides when panels resize. */
   private padCur: Pad | null = null;
@@ -217,6 +218,7 @@ export class TangleMap {
       if (!on) this.settleFlat();
     } else if (from !== to) this.tiltAnim = { from, to, start: -1, yaw0: this.yaw, pitch0: this.pitch };
     this.compass?.classList.toggle('on', on);
+    this.turns?.classList.toggle('on', on);
     this.dirty = true;
     if (on) this.wakeDeco();
   }
@@ -256,6 +258,7 @@ export class TangleMap {
   private M = new DOMMatrix();
   private tiltCss = '';
   private compass: HTMLButtonElement | null = null;
+  private turns: HTMLElement | null = null;
 
   /** Set the board's transform for the current lean and turn. */
   private applyTilt() {
@@ -384,6 +387,33 @@ export class TangleMap {
       this.orbitTo(base.yaw + step[0] * (Math.PI / 12), base.pitch + step[1] * 4);
     });
     this.compass = b;
+    // two quick turns above the dial: to the next 45° step either way
+    const turns = document.createElement('div');
+    turns.className = 'turns';
+    const arrow = (cw: boolean) => `<svg viewBox="0 0 24 24" aria-hidden="true"><g${cw ? '' : ' transform="translate(24 0) scale(-1 1)"'}><path d="M18.4 15.2A7 7 0 1 1 16.95 7.05" class="ta"/><path d="M18.6 3.6V8.4H13.8" class="ta"/></g></svg>`;
+    for (const cw of [false, true]) {
+      const t = document.createElement('button');
+      t.type = 'button';
+      t.className = 'turn-step';
+      t.title = cw ? 'Turn 45° clockwise' : 'Turn 45° anticlockwise';
+      t.setAttribute('aria-label', t.title);
+      t.innerHTML = arrow(cw);
+      t.addEventListener('pointerdown', (e) => e.stopPropagation());
+      t.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const q = Math.PI / 4, base = this.orbit ?? { yaw: this.yaw, pitch: this.pitch };
+        const k = base.yaw / q;
+        this.orbitTo((cw ? Math.floor(k + 1e-3) + 1 : Math.ceil(k - 1e-3) - 1) * q, base.pitch);
+      });
+      turns.append(t);
+    }
+    css.textContent += `.turns{position:absolute;z-index:6;display:flex;flex-direction:column;gap:6px;visibility:hidden;opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s,visibility 0s .35s}
+.turns.on{visibility:visible;opacity:1;transform:none;transition-delay:0s}
+.turn-step{width:36px;height:36px;padding:0;border-radius:50%;border:1px solid #ffffff2e;background:#101218d9;display:grid;place-items:center;cursor:pointer}
+.turn-step:hover{border-color:#ffffff5c}.turn-step:active{transform:scale(.92)}.turn-step:focus-visible{outline:2px solid #ffb02e;outline-offset:2px}
+.turn-step svg{width:20px;height:20px}.turn-step .ta{fill:none;stroke:#efe6d0;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}`;
+    host.append(turns);
+    this.turns = turns;
   }
 
   /** Decorative WebGL layer, present only while tilted (and while it fades out). */
