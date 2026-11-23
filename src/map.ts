@@ -25,6 +25,8 @@ function lean(t: number): number {
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+/** An angle folded into -π..π. */
+const wrapA = (a: number) => ((a + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 /** Is this colour dark enough to need light text on it? */
@@ -207,6 +209,8 @@ export class TangleMap {
     // One choreographed move, driven from here (not a CSS transition) so that everything
     // that leans, rises and lies back down can follow the same progress, frame by frame.
     const from = this.tiltP, to = on ? 1 : 0;
+    // lying back down cancels any turn still in motion, and takes the short way back round
+    if (!on) { this.orbit = null; this.spin = 0; this.yaw = wrapA(this.yaw); }
     if (this.still || !this.bundle || document.hidden) {
       this.tiltP = to;
       this.tiltAnim = null;
@@ -230,6 +234,7 @@ export class TangleMap {
     this.yaw = 0;
     this.pitch = PITCH;
     this.orbit = null;
+    this.spin = 0;
     for (const el of [this.board, this.fog]) { el.style.transform = ''; el.style.transition = ''; }
     this.tiltCss = '';
     if (this.wide) { this.wide = false; this.resize(); }
@@ -241,7 +246,12 @@ export class TangleMap {
   /** The reader's own turn of the tilted map (radians, about the screen centre) and lean (degrees). */
   private yaw = 0;
   private pitch = PITCH;
+  /** Where the turn and lean are heading; the frame loop eases them there. */
   private orbit: { yaw: number; pitch: number } | null = null;
+  /** Leftover turn after a flick (radians per ms), and the recent turn it is measured from. */
+  private spin = 0;
+  private spinLog: { t: number; yaw: number }[] = [];
+  private orbitT = 0;
   /** The board's transform as a matrix, for converting between screen and map. */
   private M = new DOMMatrix();
   private tiltCss = '';
@@ -261,19 +271,9 @@ export class TangleMap {
       Object.assign(this.fog.style, { transform: 'none', transition: 'none' });
     }
     if (this.compass) {
-      const o = this.toScreen(this.cam.x, this.cam.y), n = this.toScreen(this.cam.x, this.cam.y - 100);
-      const a = o && n ? Math.atan2(n[0] - o[0], -(n[1] - o[1])) : 0;
-      this.compass.style.setProperty('--north', `${((a * 180) / Math.PI).toFixed(2)}deg`);
+      // the reader's own turn, so the dial sits straight at the starting view (the lean's perspective does not tip it)
+      this.compass.style.setProperty('--turn', `${((this.yaw * 180) / Math.PI).toFixed(2)}deg`);
     }
-  }
-
-  /** Map point → stage-relative screen point (CSS px), through the board's lean and turn. */
-  private toScreen(wx: number, wy: number): [number, number] | null {
-    const [sx, sy] = this.shift(), z = this.cam.z;
-    const q = this.M.transformPoint(new DOMPoint((wx - this.cam.x) * z + sx, (wy - this.cam.y) * z + sy, 0, 1));
-    if (q.z >= PERSPECTIVE - 1) return null;
-    const k = PERSPECTIVE / (PERSPECTIVE - q.z);
-    return [this.W / 2 + q.x * k, this.H / 2 + q.y * k];
   }
 
   /**
@@ -296,47 +296,84 @@ export class TangleMap {
   /** Turn and lean the tilted map (radians, degrees), clamped to what still covers the view. */
   private turn(dYaw: number, dPitch = 0) {
     if (!this.tilt) return;
-    this.orbit = null;
-    this.yaw = ((this.yaw + dYaw + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
-    this.pitch = clamp(this.pitch + dPitch, 38, 62);
+    // the pointer moves the target; the frame loop eases the map after it, so a jittery hand still turns smoothly
+    const o = this.orbit ?? { yaw: this.yaw, pitch: this.pitch };
+    o.yaw += dYaw;
+    o.pitch = clamp(o.pitch + dPitch, 38, 62);
+    this.spin = 0;
     this.dirty = true;
+    if (this.still) { this.yaw = wrapA(o.yaw); this.pitch = o.pitch; this.orbit = null; return; }
+    this.orbit = o;
+    const t = performance.now();
+    this.spinLog.push({ t, yaw: o.yaw });
+    while (this.spinLog.length > 2 && t - this.spinLog[0].t > 90) this.spinLog.shift();
   }
 
-  /** Ease the turn and lean to a target (keyboard steps, and back to north on reset). */
+  /** On letting go of a turn: a quick flick keeps the map turning a little, then it slows to a stop. */
+  private fling() {
+    const log = this.spinLog, now = performance.now();
+    this.spinLog = [];
+    if (this.still || log.length < 2) return;
+    const a = log[0], b = log[log.length - 1];
+    if (now - b.t > 60 || b.t - a.t < 8) return; // the hand had stopped before letting go
+    this.spin = clamp((b.yaw - a.yaw) / (b.t - a.t), -0.005, 0.005);
+  }
+
+  /** Ease the turn and lean to a target (keyboard steps, and back to the starting view on reset). */
   private orbitTo(yaw: number, pitch: number) {
     if (!this.tilt) return;
-    const d = ((yaw - this.yaw + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
-    if (this.still) { this.yaw += d; this.pitch = pitch; this.dirty = true; return; }
-    this.orbit = { yaw: this.yaw + d, pitch: clamp(pitch, 38, 62) };
+    const d = wrapA(yaw - (this.orbit?.yaw ?? this.yaw));
+    this.spin = 0;
+    if (this.still) { this.yaw = wrapA(this.yaw + d); this.pitch = pitch; this.orbit = null; this.dirty = true; return; }
+    this.orbit = { yaw: (this.orbit?.yaw ?? this.yaw) + d, pitch: clamp(pitch, 38, 62) };
   }
 
-  /** A small compass, shown while tilted: shows north, drag to turn, tap (or Enter) for north-up, arrows to turn and lean. */
+  /**
+   * A small turn dial, shown while tilted. The book never says which way is north, so it shows how far
+   * the reader has turned the map from where it started, not a compass heading. Drag to turn, tap
+   * (or Enter) to go back to the starting view, arrows to turn and lean.
+   */
   private makeCompass(host: HTMLElement) {
     const b = document.createElement('button');
     b.className = 'compass';
     b.type = 'button';
-    b.title = 'Turn the map (drag), or tap for north up';
-    b.setAttribute('aria-label', 'Map rotation. Arrow keys turn and lean the map; Enter resets to north up.');
-    b.innerHTML = '<svg viewBox="-22 -22 44 44" aria-hidden="true"><g class="needle"><path d="M0-12 4.5 0H-4.5Z" class="n"/><path d="M0 12 4.5 0H-4.5Z" class="s"/><text y="-14.5" class="nl">N</text></g></svg>';
+    b.title = 'Turn the map (drag), or tap to straighten it';
+    b.setAttribute('aria-label', 'Map rotation. Arrow keys turn and lean the map; Enter straightens it again.');
+    const ticks = Array.from({ length: 24 }, (_, i) => { const a = (i * Math.PI) / 12, r0 = i % 6 ? 17.5 : 15.5; return `M${(r0 * Math.sin(a)).toFixed(2)} ${(-r0 * Math.cos(a)).toFixed(2)}L${(19.5 * Math.sin(a)).toFixed(2)} ${(-19.5 * Math.cos(a)).toFixed(2)}`; }).join('');
+    // the ticks and the little map sheet turn with the map; the amber mark at the top stays put, so it reads like a dial
+    b.innerHTML = `<svg viewBox="-22 -22 44 44" aria-hidden="true"><g class="needle"><path d="${ticks}" class="tk"/><rect x="-7" y="-8.5" width="14" height="17" rx="2.5" class="sh"/><path d="M-3.5-4.5H3.5M-3.5-1H3.5M-3.5 2.5H1" class="sl"/></g><path d="M0-21.5 2.6-17.6H-2.6Z" class="mk"/></svg>`;
     // its look lives here, not in the lazily loaded 3D stylesheet, so it is never unstyled
     const css = document.createElement('style');
     css.textContent = `.compass{position:absolute;z-index:6;width:46px;height:46px;padding:0;border-radius:50%;border:1px solid #ffffff2e;background:#101218d9;display:grid;place-items:center;cursor:grab;touch-action:none;
   visibility:hidden;opacity:0;transform:scale(.85);transition:opacity .35s,transform .35s,visibility 0s .35s}
 .compass.on{visibility:visible;opacity:1;transform:none;transition-delay:0s}
 .compass:active{cursor:grabbing}.compass:focus-visible{outline:2px solid #ffb02e;outline-offset:2px}
-.compass svg{width:40px;height:40px;overflow:visible}.compass .needle{transform:rotate(var(--north,0deg))}
-.compass .n{fill:#e5484d}.compass .s{fill:#8d877a}.compass .nl{fill:#efe6d0;font:700 8px Inter,system-ui,sans-serif;text-anchor:middle}`;
+.compass svg{width:40px;height:40px;overflow:visible}.compass .needle{transform:rotate(var(--turn,0deg))}
+.compass .tk{stroke:#efe6d080;stroke-width:1.2;stroke-linecap:round}.compass .sh{fill:#efe6d01f;stroke:#efe6d0;stroke-width:1.3}
+.compass .sl{stroke:#efe6d0a6;stroke-width:1.2;stroke-linecap:round}.compass .mk{fill:#ffb02e}`;
     host.append(css, b);
-    let drag: { a: number; yaw: number; moved: number } | null = null;
-    const ang = (e: PointerEvent) => { const r = b.getBoundingClientRect(); return Math.atan2(e.clientY - r.top - r.height / 2, e.clientX - r.left - r.width / 2); };
-    b.addEventListener('pointerdown', (e) => { b.setPointerCapture(e.pointerId); drag = { a: ang(e), yaw: this.yaw, moved: 0 }; e.stopPropagation(); });
+    let drag: { a: number; x: number; y: number; moved: number; rim: boolean } | null = null;
+    const at = (e: PointerEvent) => { const r = b.getBoundingClientRect(), x = e.clientX - r.left - r.width / 2, y = e.clientY - r.top - r.height / 2; return { a: Math.atan2(y, x), d: Math.hypot(x, y) }; };
+    b.addEventListener('pointerdown', (e) => {
+      b.setPointerCapture(e.pointerId);
+      const p = at(e);
+      drag = { a: p.a, x: e.clientX, y: e.clientY, moved: 0, rim: p.d > 13 };
+      this.spin = 0;
+      this.spinLog = [];
+      e.stopPropagation();
+    });
     b.addEventListener('pointermove', (e) => {
       if (!drag) return;
-      const d = ang(e) - drag.a;
-      drag.moved += Math.abs(e.movementX) + Math.abs(e.movementY);
-      if (drag.moved > 4) this.turn(drag.yaw + d - this.yaw);
+      const p = at(e), dx = e.clientX - drag.x, da = wrapA(p.a - drag.a);
+      drag.moved += Math.abs(dx) + Math.abs(e.clientY - drag.y);
+      drag.a = p.a; drag.x = e.clientX; drag.y = e.clientY;
+      if (drag.moved <= 4) return;
+      // Grabbed by the rim, the map follows the hand round the dial (held close to the middle, where a
+      // pixel is a big jump in angle, it pauses). Grabbed in the middle, it is a slider: right is clockwise.
+      this.turn(drag.rim ? (p.d > 8 ? da : 0) : dx * 0.01);
     });
-    b.addEventListener('pointerup', () => { const tap = drag && drag.moved <= 4; drag = null; if (tap) this.orbitTo(0, PITCH); });
+    b.addEventListener('pointerup', () => { const tap = drag && drag.moved <= 4; drag = null; if (tap) this.orbitTo(0, PITCH); else this.fling(); });
+    b.addEventListener('pointercancel', () => { drag = null; this.spinLog = []; });
     b.addEventListener('click', (e) => { if (e.detail === 0) this.orbitTo(0, PITCH); });
     b.addEventListener('keydown', (e) => {
       const step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
@@ -692,6 +729,7 @@ export class TangleMap {
       this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       this.moved = 0;
       this.fly = null;
+      this.spin = 0; // a hand on the map stops a flick
       // tilted: right-drag, or drag with Shift or Alt, turns and leans the map
       turning = this.tilt && (e.button === 2 || e.shiftKey || e.altKey);
     });
@@ -725,6 +763,7 @@ export class TangleMap {
     });
     const up = (e: PointerEvent) => {
       const had = this.pointers.delete(e.pointerId);
+      if (had && this.pointers.size === 0 && this.moved >= 8) this.fling();
       if (had && this.moved < 8 && this.pointers.size === 0) {
         const el0 = document.elementFromPoint(e.clientX, e.clientY) as Element | null;
         const who = el0?.closest('[data-person]');
@@ -1041,16 +1080,25 @@ export class TangleMap {
       if (a.start < 0) a.start = now;
       const t = clamp((now - a.start) / TILT_MS, 0, 1), e = lean(t);
       this.tiltP = a.from + (a.to - a.from) * e;
-      // going back to flat also turns the map north-up again, in the same move
+      // going back to flat also turns the map back to its starting angle, in the same move
       if (a.to === 0) { this.yaw = a.yaw0 * (1 - e); this.pitch = a.pitch0 + (PITCH - a.pitch0) * e; }
       if (t >= 1) { this.tiltP = a.to; this.tiltAnim = null; if (a.to === 0) this.settleFlat(); }
       this.dirty = true;
     }
+    const dt = this.orbitT ? clamp(now - this.orbitT, 0, 64) : 16;
+    this.orbitT = now;
+    if (this.spin) {
+      const o = (this.orbit ??= { yaw: this.yaw, pitch: this.pitch });
+      o.yaw += this.spin * dt;
+      this.spin *= Math.exp(-dt / 300);
+      if (Math.abs(this.spin) < 3e-5) this.spin = 0;
+    }
     if (this.orbit) {
-      const o = this.orbit, k = 0.18;
+      // time-based easing, so it feels the same at 60 Hz and 120 Hz
+      const o = this.orbit, k = 1 - Math.exp(-dt / 70);
       this.yaw += (o.yaw - this.yaw) * k;
       this.pitch += (o.pitch - this.pitch) * k;
-      if (Math.abs(o.yaw - this.yaw) < 1e-3 && Math.abs(o.pitch - this.pitch) < 0.05) { this.yaw = o.yaw; this.pitch = o.pitch; this.orbit = null; }
+      if (!this.spin && Math.abs(o.yaw - this.yaw) < 1e-3 && Math.abs(o.pitch - this.pitch) < 0.05) { this.yaw = wrapA(o.yaw); this.pitch = o.pitch; this.orbit = null; }
       this.dirty = true;
     }
     if (this.fade) {
