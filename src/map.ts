@@ -177,7 +177,7 @@ export class TangleMap {
     this.pad = p;
     this.dirty = true;
     if (this.compass) Object.assign(this.compass.style, { right: `${p.right + 16}px`, bottom: `${p.bottom + 16}px` });
-    if (this.turns) Object.assign(this.turns.style, { right: `${p.right + 16 + 5}px`, bottom: `${p.bottom + 16 + 46 + 8}px` });
+    if (this.turns) Object.assign(this.turns.style, { right: `${p.right + 16}px`, bottom: `${p.bottom + 16 + 46 + 8}px` });
   }
   /** The padding actually in use, easing toward `pad` so the map glides when panels resize. */
   private padCur: Pad | null = null;
@@ -390,14 +390,15 @@ export class TangleMap {
     // two quick turns above the dial: to the next 45° step either way
     const turns = document.createElement('div');
     turns.className = 'turns';
-    const arrow = (cw: boolean) => `<svg viewBox="0 0 24 24" aria-hidden="true"><g${cw ? '' : ' transform="translate(24 0) scale(-1 1)"'}><path d="M18.4 15.2A7 7 0 1 1 16.95 7.05" class="ta"/><path d="M18.6 3.6V8.4H13.8" class="ta"/></g></svg>`;
+    // a small arc with its head on the turning end; mirrored for anticlockwise
+    const arrow = (cw: boolean) => `<svg viewBox="0 0 16 10" aria-hidden="true"><g${cw ? '' : ' transform="translate(16 0) scale(-1 1)"'}><path d="M2.5 8.2C3.6 4.2 7.4 2.2 11.6 3.6" class="ta"/><path d="M9.4 1.2 12.4 3.8 9.6 6.6" class="ta"/></g></svg>`;
     for (const cw of [false, true]) {
       const t = document.createElement('button');
       t.type = 'button';
       t.className = 'turn-step';
       t.title = cw ? 'Turn 45° clockwise' : 'Turn 45° anticlockwise';
       t.setAttribute('aria-label', t.title);
-      t.innerHTML = arrow(cw);
+      t.innerHTML = `${arrow(cw)}<span>${cw ? '+' : '−'}45°</span>`;
       t.addEventListener('pointerdown', (e) => e.stopPropagation());
       t.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -407,11 +408,14 @@ export class TangleMap {
       });
       turns.append(t);
     }
-    css.textContent += `.turns{position:absolute;z-index:6;display:flex;flex-direction:column;gap:6px;visibility:hidden;opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s,visibility 0s .35s}
+    css.textContent += `.turns{position:absolute;z-index:6;width:46px;display:flex;flex-direction:column;border-radius:16px;border:1px solid #ffffff2e;background:#101218d9;overflow:hidden;
+  visibility:hidden;opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s,visibility 0s .35s}
 .turns.on{visibility:visible;opacity:1;transform:none;transition-delay:0s}
-.turn-step{width:36px;height:36px;padding:0;border-radius:50%;border:1px solid #ffffff2e;background:#101218d9;display:grid;place-items:center;cursor:pointer}
-.turn-step:hover{border-color:#ffffff5c}.turn-step:active{transform:scale(.92)}.turn-step:focus-visible{outline:2px solid #ffb02e;outline-offset:2px}
-.turn-step svg{width:20px;height:20px}.turn-step .ta{fill:none;stroke:#efe6d0;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}`;
+.turn-step{height:40px;padding:0;border:0;background:none;color:#efe6d0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;
+  font:600 10.5px/1 Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.turn-step+.turn-step{border-top:1px solid #ffffff1f}
+.turn-step:hover{background:#ffffff12}.turn-step:active{background:#ffffff1f}.turn-step:focus-visible{outline:2px solid #ffb02e;outline-offset:-2px}
+.turn-step svg{width:16px;height:10px}.turn-step .ta{fill:none;stroke:#ffb02e;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}`;
     host.append(turns);
     this.turns = turns;
   }
