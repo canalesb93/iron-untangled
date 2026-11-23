@@ -111,7 +111,7 @@ export function lint(c: Content): Problem[] {
     for (const l of c.lines)
       for (const g of l.legs ?? [])
         if (g.at <= ch && (g.until == null || ch < g.until) && l.revealAt <= ch)
-          for (const id of g.stops) if (!vis.has(id)) out.push({ ch, kind: 'dangling-leg', detail: `${l.id} leg@${g.at} stop ${id} not visible` });
+          for (const id of g.stops) if (typeof id === 'string' && !vis.has(id)) out.push({ ch, kind: 'dangling-leg', detail: `${l.id} leg@${g.at} stop ${id} not visible` });
     for (const l of c.lines)
       for (const sp of l.spans ?? []) if (sp.at < l.revealAt) out.push({ ch, kind: 'span-before-reveal', detail: `${l.id} span@${sp.at}` });
     for (const h of b.hops) {

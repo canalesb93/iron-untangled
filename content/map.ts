@@ -7,6 +7,15 @@ import type { Hop, Line, Station } from './types.ts';
  * inward to station 435.
  */
 
+// The Nightmare Express runs a figure-eight. It crosses itself once, between its two pairs of
+// stops; two short straight strokes through that point keep the crossing a clean X.
+const EIGHT = { x: -150, y: -400, h: 120 };
+/** A point on one of the two strokes: `h` from the crossing, at a compass bearing (0 = up). */
+const cross = (deg: number): [number, number] => {
+  const a = ((deg - 90) * Math.PI) / 180;
+  return [Math.round(EIGHT.x + EIGHT.h * Math.cos(a)), Math.round(EIGHT.y + EIGHT.h * Math.sin(a))];
+};
+
 export const lines: Line[] = [
   {
     id: 'red', revealAt: 1, name: 'Red Line', kind: 'colored', color: '#e5484d', arm: 0,
@@ -136,7 +145,8 @@ export const lines: Line[] = [
   {
     id: 'nightmare', revealAt: 4, name: 'Nightmare Express', kind: 'named', color: '#1d1e24',
     legs: [
-      { at: 15, stops: ['s83', 's283', 'cavern', 's436', 's283b', 's83b'], closed: true },
+      // 83 → 283 → (cavern) → 436 → 283 → 83 and round again, crossing over between each pair
+      { at: 15, stops: ['s83', [700, 250], cross(115), cross(290), 's283', 'cavern', 's436', cross(55), cross(232), 's283b', 's83b', [0, 1150]], closed: true },
       { at: 19, stops: ['s60', 's41'] },
     ],
     stages: [
@@ -392,7 +402,7 @@ export const stations: Station[] = [
     facts: [{ at: 4, lines: ['Nightmare Express', 'Green Line', 'Yellow Line'], has: ['Saferoom'] }],
   },
   {
-    id: 's83b', revealAt: 4, num: 83, name: 'Station 83 (second)', pos: { deg: 335 }, mapAt: 15,
+    id: 's83b', revealAt: 4, num: 83, name: 'Station 83 (second)', pos: { deg: 225 }, mapAt: 15,
     kinds: [{ at: 4, kind: 'transfer' }],
     secret: [],
     stages: [{ at: 4, text: 'Another station 83, where the Tangerine and Plum lines meet. The Nightmare Express’s fifth and last stop before it comes back round to the first 83.' }],
@@ -401,7 +411,7 @@ export const stations: Station[] = [
 
   // ── the far end ──────────────────────────────────────────────────────
   {
-    id: 's436', revealAt: 4, num: 436, name: 'Station 436', pos: { deg: 100, r: 215 }, mapAt: 15,
+    id: 's436', revealAt: 4, num: 436, name: 'Station 436', pos: { deg: 23, r: 555 }, mapAt: 15,
     names: [{ at: 15, text: 'Abyss Station' }],
     kinds: [{ at: 4, kind: 'landmark' }],
     stages: [
@@ -414,7 +424,7 @@ export const stations: Station[] = [
     ],
   },
   {
-    id: 'cavern', revealAt: 15, name: 'Switching Cavern', pos: { deg: 62, r: 420 },
+    id: 'cavern', revealAt: 15, name: 'Switching Cavern', pos: { deg: 15, r: 980 },
     kinds: [{ at: 15, kind: 'landmark' }],
     stages: [
       { at: 15, text: 'A junction on the Nightmare Express route just before station 436, with three gates: Auxiliary Tracks, Station Repair and Recycle.' },

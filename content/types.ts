@@ -55,7 +55,8 @@ export interface Line {
   /** Colored lines: stretches of the line the reader knows about, by station number. */
   spans?: { at: Ch; from: number; to: number; mode: 'ridden' | 'charted' }[];
   /** Named routes: drawn through station positions rather than along an arm. */
-  legs?: { at: Ch; until?: Ch; stops: string[]; closed?: boolean }[];
+  /** A named train's route: station ids in riding order. A bare [x, y] is a bend in the track (map units), not a stop. */
+  legs?: { at: Ch; until?: Ch; stops: (string | [number, number])[]; closed?: boolean }[];
 }
 
 export type Pos =

@@ -231,7 +231,7 @@ function sliceBody(c: Content, ch: number): Omit<Bundle, 'legend'> {
       segs: upto(l.spans ?? [], ch).map((sp) => ({ mode: sp.mode, at: sp.at, pts: along(l, sp.from, sp.to), fade: sp.mode === 'charted' ? [sp.from > 11, sp.to < 435] as [boolean, boolean] : undefined })),
       legs: upto(l.legs ?? [], ch)
         .filter((g) => g.until == null || ch < g.until)
-        .map((g) => ({ at: g.at, closed: !!g.closed, pts: g.stops.flatMap((id) => xyOf(id)) })),
+        .map((g) => ({ at: g.at, closed: !!g.closed, pts: g.stops.flatMap((id) => (typeof id === 'string' ? xyOf(id) : id)) })),
     })),
     stations: seen(c.stations).map((s) => ({
       id: s.id, num: s.num, name: last(s.names ?? [], ch)?.text ?? s.name, kind: last(s.kinds, ch)?.kind ?? 'stop',
