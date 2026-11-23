@@ -112,7 +112,12 @@ async function chapter(n: number) {
 }
 // chapters are independent readers, so a few run at once
 {
-  const queue = Array.from({ length: total + 1 }, (_, n) => n);
+  // E2E_CHAPTERS=quick (CI on every push) checks a spread: the edges, the chapters that reveal the most,
+  // and one more that rotates with the run number so every chapter comes round. Unset, it checks all of them.
+  const all = Array.from({ length: total + 1 }, (_, n) => n);
+  const spin = Number(process.env.GITHUB_RUN_NUMBER ?? Date.now()) % (total + 1);
+  const queue = process.env.E2E_CHAPTERS === 'quick' ? [...new Set([0, 1, 4, 15, 17, total - 1, total, spin])].sort((a, b) => a - b) : all;
+  console.log(`checking chapters ${queue.length === all.length ? `0–${total}` : queue.join(', ')}`);
   const workers = Math.max(1, Number(process.env.E2E_WORKERS ?? 4));
   await Promise.all(Array.from({ length: workers }, async () => { for (let n = queue.shift(); n !== undefined; n = queue.shift()) await chapter(n); }));
 }
@@ -144,5 +149,5 @@ async function chapter(n: number) {
 }
 
 await browser.close();
-console.log(failures ? `\n✖ ${failures} spoiler failure(s)` : `✔ rendered-page spoiler test clean across ${total + 1} chapters`);
+console.log(failures ? `\n✖ ${failures} spoiler failure(s)` : `✔ rendered-page spoiler test clean (${process.env.E2E_CHAPTERS === 'quick' ? 'sample of chapters' : `all ${total + 1} chapters`})`);
 process.exit(failures ? 1 : 0);
