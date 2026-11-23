@@ -84,7 +84,10 @@ $('#app').innerHTML = `
     </div>
     <div class="track" role="group" aria-label="Chapters"></div>
   </footer>
+  <div class="corner">
+  <button class="caveat" data-act="about" title="Why the map is an interpretation"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg><span>Fan interpretation, <b>not an official map</b></span></button>
   <a class="byline" href="https://github.com/canalesb93/iron-untangled" target="_blank" rel="noopener" aria-label="Open source on GitHub: help improve this map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span>Open source · <b>help improve this map</b></span></a>
+  </div>
   <aside class="legend" hidden></aside>
   <div class="pop" role="tooltip" hidden></div>
   <div class="tour" hidden></div>
@@ -190,7 +193,8 @@ function renderLegend() {
   const el = $('.legend');
   el.hidden = !state.legend || !bundle.legend.length;
   el.innerHTML = el.hidden ? '' : `<div class="legend-head"><b>Map key</b><button data-act="legend" aria-label="Hide the key">×</button></div>
-    <ul>${bundle.legend.map((l) => `<li data-key="${l.key}"><svg viewBox="0 0 32 20" aria-hidden="true">${SWATCH[l.key] ?? ''}</svg><span>${esc(l.text)}</span></li>`).join('')}</ul>`;
+    <ul>${bundle.legend.map((l) => `<li data-key="${l.key}"><svg viewBox="0 0 32 20" aria-hidden="true">${SWATCH[l.key] ?? ''}</svg><span>${esc(l.text)}</span></li>`).join('')}</ul>
+    <p class="legend-note">A fan interpretation, not an official map. Positions and distances are our own reading of the book, not to scale.</p>`;
   $('[data-act="legend"].tool').setAttribute('aria-pressed', String(state.legend));
   highlightLegend(map.selectedId());
 }
@@ -840,15 +844,16 @@ function welcome() {
     <div class="pick" role="group" aria-label="Last chapter you finished">${Array.from({ length: state.total + 1 }, (_, n) => cell(n)).join('')}</div>
     <div class="row tight"><button class="cta" data-act="begin">Open the map</button></div>
     <button class="whole" data-act="whole">Finished the book? Just view the whole map</button>
-    <p class="fine">Assumes you’ve read books 1 and 2. Unofficial fan project.</p>`);
+    <p class="fine">Assumes you’ve read books 1 and 2. An unofficial fan project: the map is our interpretation of the book, not an official layout, and most details are unverified.</p>`);
 }
 
 function about() {
   modal(`
     <p class="eyebrow">About</p>
     <h2>The Iron Tangle, as far as you’ve read</h2>
+    <p class="caveat-box"><b>This is not an official map.</b> It is a fan interpretation of what the book describes. The book gives station numbers and line names but never says where anything sits, so the positions, distances and shapes of the lines are our own reading of it, drawn like a subway diagram rather than to scale.</p>
+    <p><b>How reliable are the facts?</b> Treat them as mostly unverified. Station numbers, line names and who was where were gathered from chapter summaries and the fan wiki, not checked line by line against the book, so expect gaps and mistakes.</p>
     <p><b>Spoiler policy.</b> Every fact here is stamped with the chapter that reveals it. The site is built as one file per chapter, and your browser only ever downloads the file for a chapter you have unsealed. Nothing later is hidden in the page.</p>
-    <p><b>Is the map accurate?</b> Station numbers, line names and who was where are taken from the book by way of chapter summaries and the fan wiki. The layout is a schematic of our own, in the way a subway diagram is: the book never fixes compass positions. Distances are compressed so the stations the story visits have room.</p>
     <p><b>Reading the map.</b> Solid lines have been ridden. Dotted lines are known about but not seen. Faint rings are station numbers shared by more than one line. The pulsing mark is the party.</p>
     <p><b>Spotted a mistake?</b> <button class="inline" data-act="report">Report an inaccuracy</button>. Reports are posted publicly on GitHub.</p>
     <p><b>Privacy.</b> No accounts and no cookies. Your reading progress is stored only in this browser. Cloudflare provides anonymous, aggregate traffic statistics. Anything you send with the report form is posted publicly on GitHub.</p>

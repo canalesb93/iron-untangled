@@ -685,12 +685,23 @@ p.field { margin-top: 18px; }
 .trail-g .hit { fill: none; stroke: transparent; stroke-width: 44; stroke-linecap: round; }
 .trail-g:hover .trail { --o: 1; stroke-width: 7; }
 
-/* ── quiet byline at the map's bottom left ── */
-.byline { position: absolute; z-index: 5; left: 432px; bottom: calc(var(--rail-h, 118px) + 26px); display: flex; align-items: center; gap: 7px; padding: 5px 10px 5px 7px; border-radius: 999px; font-size: 12px; color: #f3ecd9; text-decoration: none; background: #0b0c1066; backdrop-filter: blur(6px); opacity: 0.55; transition: opacity 0.2s; }
-.byline:hover, .byline:focus-visible { opacity: 1; }
+/* ── quiet notes at the map's bottom left: what the map is, and where to help ── */
+.corner { position: absolute; z-index: 5; left: 432px; bottom: calc(var(--rail-h, 118px) + 26px); display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
+.caveat, .byline { pointer-events: auto; display: flex; align-items: center; gap: 7px; padding: 5px 10px 5px 7px; border-radius: 999px; font-size: 12px; line-height: 1.3; color: #f3ecd9; text-decoration: none; background: #0b0c1066; backdrop-filter: blur(6px); opacity: 0.55; transition: opacity 0.2s; }
+.caveat { opacity: 0.8; }
+.caveat:hover, .caveat:focus-visible, .byline:hover, .byline:focus-visible { opacity: 1; }
+.caveat svg { width: 14px; height: 14px; fill: none; stroke: var(--brass); stroke-width: 2; stroke-linecap: round; flex: none; }
 .byline svg { width: 14px; height: 14px; fill: currentColor; flex: none; }
-.byline b { font-weight: 600; }
-@media (max-width: 859px) { .byline { display: none; } }
+.caveat b, .byline b { font-weight: 600; }
+@media (max-width: 859px) {
+  .byline { display: none; }
+  /* bottom left, clear of the compass at the bottom right */
+  .corner { left: 10px; right: 78px; bottom: calc(var(--rail-h, 118px) + 10px); }
+  .caveat { font-size: 11.5px; padding: 4px 9px 4px 6px; }
+}
+.caveat-box { padding: 10px 12px; border-left: 3px solid var(--brass); border-radius: 0 8px 8px 0; background: var(--iron-3); }
+.caveat-box b { color: #f3ecd9; }
+.legend-note { margin-top: 8px; padding-top: 8px; border-top: 1px solid #ffffff14; font-size: 12px; line-height: 1.4; color: var(--dim); }
 .m-swap { stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ── wordmark ── a station sign: the roundel's bar carries the name, and the “UN” is the only red letters */

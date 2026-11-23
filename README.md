@@ -25,7 +25,9 @@ If you change content or UI, keep all four intact. The details are in [CONTRIBUT
 
 ## Is the map accurate?
 
-Facts come from the book, cross-checked against chapter summaries and the fan wiki. The layout is a schematic of our own, because the book never fixes compass positions: the only real coordinate is a station's number, mapped to distance from the centre and compressed so busy areas have room (`scripts/geometry.ts`). Corrections are very welcome.
+**It is a fan interpretation, not an official map.** The book gives station numbers and line names but never says where anything sits, so the positions, distances and shapes of the lines are our own reading of it. The only real coordinate is a station's number, mapped to distance from the centre and compressed so busy areas have room (`scripts/geometry.ts`); everything else is drawn like a subway diagram, not to scale.
+
+**Treat the facts as mostly unverified.** They were gathered from chapter summaries and the fan wiki rather than checked line by line against the book, so expect gaps and mistakes. Corrections are very welcome.
 
 ## Quick start
 
