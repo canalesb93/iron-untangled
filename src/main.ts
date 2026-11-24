@@ -791,9 +791,9 @@ function storyStop() {
   map.select(null);
 }
 
-function modal(html: string, onMount?: (el: HTMLElement) => void) {
+function modal(html: string, onMount?: (el: HTMLElement) => void, cls = '') {
   const m = $('.modal');
-  m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+  m.innerHTML = `<div class="sheet${cls ? ` ${cls}` : ''}" role="dialog" aria-modal="true">${html}</div>`;
   // the dialog is named by its heading, for screen readers
   const title = m.querySelector('h2');
   if (title) { title.id = 'sheet-title'; m.firstElementChild!.setAttribute('aria-labelledby', 'sheet-title'); }
@@ -828,23 +828,30 @@ function askReveal(n: number) {
 }
 
 let pick = 0;
+const beginLabel = (n: number) => (n === 0 ? 'Open the map' : n === state.total ? 'Open the whole map' : `Open the map at chapter ${n}`);
 function welcome() {
   pick = 0;
   const cell = (n: number) => `<button class="pk${n === 0 ? ' on' : ''}" data-pick="${n}" aria-pressed="${n === 0}">${n === 0 ? 'Not started' : n === state.total ? 'End' : n}</button>`;
   modal(`
-    <h2 class="sign" aria-label="Iron Untangled"><span class="sign-ring" aria-hidden="true"></span><span class="sign-bar" aria-hidden="true">Iron <i>Un</i>tangled</span></h2>
-    <p class="lede">A spoiler-safe map of the Iron Tangle, the subway floor in <i>Dungeon Crawler Carl: The Dungeon Anarchist’s Cookbook</i>.</p>
-    <ul class="what">
-      <li><b>A map that fills in as you read.</b> Stations, lines and where the party is, only as far as your chapter.</li>
-      <li><b>A recap for every chapter.</b> Who’s who, what happened, and the rules of the floor so far.</li>
-      <li><b>Nothing from later.</b> Your browser never even downloads the chapters ahead of you.</li>
-    </ul>
-    <p class="field">Where are you in the book?</p>
-    <p class="pick-hint">Pick the last chapter you finished. You can move on a chapter at a time as you read.</p>
-    <div class="pick" role="group" aria-label="Last chapter you finished">${Array.from({ length: state.total + 1 }, (_, n) => cell(n)).join('')}</div>
-    <div class="row tight"><button class="cta" data-act="begin">Open the map</button></div>
-    <button class="whole" data-act="whole">Finished the book? Just view the whole map</button>
-    <p class="fine">Assumes you’ve read books 1 and 2. An unofficial fan project: the map is our interpretation of the book, not an official layout, and most details are unverified.</p>`);
+    <div class="w-body">
+      <h2 class="sign" aria-label="Iron Untangled"><span class="sign-ring" aria-hidden="true"></span><span class="sign-bar" aria-hidden="true">Iron <i>Un</i>tangled</span></h2>
+      <p class="lede">A spoiler-safe map of the Iron Tangle, the subway floor in <i>Dungeon Crawler Carl: The Dungeon Anarchist’s Cookbook</i>.</p>
+      <ul class="what">
+        <li><b>Fills in as you read.</b><span class="sub"> Stations, lines and the party, only up to your chapter.</span></li>
+        <li><b>A recap for every chapter.</b><span class="sub"> Who’s who and what happened.</span></li>
+        <li><b>Nothing from later.</b><span class="sub"> Chapters ahead of you never even download.</span></li>
+      </ul>
+      <div class="w-pick">
+        <p class="field" id="pick-q">Where are you in the book?</p>
+        <p class="pick-hint">Tap the last chapter you finished.</p>
+        <div class="pick" role="group" aria-labelledby="pick-q">${Array.from({ length: state.total + 1 }, (_, n) => cell(n)).join('')}</div>
+      </div>
+      <p class="fine">Assumes you’ve read books 1 and 2. An unofficial fan project: the map is our interpretation of the book, not an official layout, and most details are unverified.</p>
+    </div>
+    <div class="w-foot">
+      <button class="cta" data-act="begin">${beginLabel(0)}</button>
+      <button class="whole" data-act="whole">Finished the book? Just view the whole map</button>
+    </div>`, undefined, 'welcome');
 }
 
 function about() {
@@ -902,7 +909,7 @@ map.onSelect = (id) => {
 document.addEventListener('click', (ev) => {
   if (state.tab === 'codex' && state.section === 'directory' && handleDirectoryClick(ev, () => renderPanel(true))) return;
   const pk = (ev.target as Element).closest<HTMLElement>('[data-pick]');
-  if (pk) { pick = +pk.dataset.pick!; document.querySelectorAll('.pk').forEach((e) => { const on = e === pk; e.classList.toggle('on', on); e.setAttribute('aria-pressed', String(on)); }); $('.modal .cta').textContent = pick === 0 ? 'Open the map' : `Open the map at ${chLabel(pick).toLowerCase()}`; return; }
+  if (pk) { pick = +pk.dataset.pick!; document.querySelectorAll('.pk').forEach((e) => { const on = e === pk; e.classList.toggle('on', on); e.setAttribute('aria-pressed', String(on)); }); $('.modal .cta').textContent = beginLabel(pick); return; }
   const sb = (ev.target as Element).closest<HTMLElement>('[data-story]');
   if (sb) { const v = sb.dataset.story; if (v === 'stop') storyStop(); else storyShow(story.i + (v === 'next' ? 1 : -1)); return; }
   const bp = (ev.target as Element).closest<HTMLElement>('li[data-place]');
