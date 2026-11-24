@@ -1,5 +1,7 @@
 # Clarity log
 
+> **Spoilers for the whole book.** This is a design log for contributors: it names stations, people and events from every chapter.
+
 What was tried to make the map easier to understand, and why. One entry per iteration; each tries something new.
 
 ## 1. Situation briefing and route playback (2026-11-20)

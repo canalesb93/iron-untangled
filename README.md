@@ -8,7 +8,7 @@ An unofficial, spoiler-safe map and reading companion for *Dungeon Crawler Carl:
 
 Tell it which chapter you have finished and it draws the floor, the Iron Tangle, as the book has revealed it so far, with a short recap, a codex of people, places and terms, and the party's route. Everything you have not read yet stays under fog. Looking back at earlier chapters is free; moving forward is a deliberate press-and-hold.
 
-This README is spoiler-free, apart from the screenshot above, which shows the map after chapter 1. Issues and pull requests are not: they discuss the book chapter by chapter.
+This README is spoiler-free, apart from the screenshot above, which shows the map after chapter 1. **The rest of the repository is not.** The source of truth in `content/` holds the whole book, and issues, pull requests and the design log in `docs/` discuss it chapter by chapter. If you are still reading, use the site rather than browsing the code.
 
 > **Unofficial fan project.** Iron Untangled is not affiliated with, or endorsed by, Matt Dinniman or any publisher of the series. The book, its world and its characters belong to their author and publisher. All book-related text in this project is our own paraphrase and commentary, never quoted book text. No cover art or fan art is included; the few portraits are original drawings made for this site.
 
@@ -80,7 +80,7 @@ scripts/
   geometry.ts   Schematic map coordinates
 src/            The app: UI, map rendering, styles
 public/         Static files, response headers, the generated bundles
-docs/           The README screenshot
+docs/           The README screenshot and the design log (spoilers)
 wrangler.jsonc  Cloudflare Workers config
 ```
 
